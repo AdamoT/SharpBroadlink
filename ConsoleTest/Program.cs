@@ -1,11 +1,12 @@
-﻿using System;
+﻿using SharpBroadlink;
+using SharpBroadlink.Devices;
+
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using SharpBroadlink;
-using SharpBroadlink.Devices;
 
 namespace ConsoleTest
 {
@@ -49,7 +50,7 @@ namespace ConsoleTest
 
                 //TestIrLearning().Wait();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("Error: " + e.Message);
             }
@@ -77,7 +78,7 @@ namespace ConsoleTest
                 throw new Exception("Auth Failure");
 
             Console.WriteLine("Learning command, press remote now");
-            var command = await rm.LearnIRCommnad(CancellationToken.None);
+            var command = await rm.LearnIRCommnad(null, CancellationToken.None);
             if (command == null || command.Length == 0)
                 throw new Exception("Failed to learn command");
 
@@ -101,7 +102,7 @@ namespace ConsoleTest
 
             if (!await rm.Auth())
                 throw new Exception("Auth Failure");
-            
+
             Console.WriteLine("Starting RF frequency learning - press any button to continue, then, press and hold the remote button...");
             while (!Console.KeyAvailable)
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
@@ -112,7 +113,7 @@ namespace ConsoleTest
             byte[] command = null;
             try
             {
-                Action<Rm2Pro.LearnInstructions> learnInstructionHandler = (instructions) =>
+                Action<LearnInstructions> learnInstructionHandler = (instructions) =>
                 {
                     //Get description from the enum - any other text will do
                     var msg = instructions.GetType().GetField(instructions.ToString())
@@ -121,7 +122,7 @@ namespace ConsoleTest
                         .FirstOrDefault()
                         ?.Description
                         ?? instructions.ToString();
-                        
+
                     Console.WriteLine(msg);
                     Console.ReadKey(true);
                 };
@@ -134,7 +135,7 @@ namespace ConsoleTest
                 if (command == null || command.Length == 0)
                     throw new InvalidOperationException("Failed to learn RF command");
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 Console.WriteLine("Command learning cancelled");
                 return false;
@@ -196,11 +197,11 @@ namespace ConsoleTest
             await Broadlink.Setup("XXXX", "XXXX", Broadlink.WifiSecurityMode.WPA12);
 
             return true;
-         }
+        }
 
         private static void Lirc2ProntoTest()
         {
-            int[] raw = new int[] 
+            int[] raw = new int[]
             {
                 //1000, 2400,  600,  600, 600, 1200,  600, 1200,  600, 1200,
                 // 600,  600,  600, 1200, 600,  600,  600,  600,  600, 1200,
