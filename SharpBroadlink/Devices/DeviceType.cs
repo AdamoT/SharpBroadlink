@@ -1,90 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SharpBroadlink.Devices
+﻿namespace SharpBroadlink.Devices
 {
-    public enum DeviceType
-    {
+	public enum DeviceType
+	{
         /// <summary>
-        /// Unknown device
+        ///     Unknown device
         /// </summary>
         Unknown = 0,
 
         /// <summary>
-        /// Smart Plug 1
+        ///     Smart Plug 1
         /// </summary>
         /// <remarks>
-        /// ?
+        ///     ?
         /// </remarks>
         Sp1 = 1,
 
         /// <summary>
-        /// Smart Plug 2
+        ///     Smart Plug 2
         /// </summary>
         /// <remarks>
-        /// SP2, Honeywell SP2, SPMini, SP3, OEM branded SP3, SP3S, SPMini2,
-        /// OEM branded SPMini, OEM branded SPMini2, SPMiniPlus
+        ///     SP2, Honeywell SP2, SPMini, SP3, OEM branded SP3, SP3S, SPMini2,
+        ///     OEM branded SPMini, OEM branded SPMini2, SPMiniPlus
         /// </remarks>
-
         Sp2 = 2,
 
         /// <summary>
-        /// RM IR Controller
+        ///     RM IR Controller
         /// </summary>
         /// <remarks>
-        /// RM2, RM Mini, RM Pro Phicomm, RM2 Home Plus, RM2 Home Plus GDT,
-        /// RM Mini Shate
+        ///     RM2, RM Mini, RM Pro Phicomm, RM2 Home Plus, RM2 Home Plus GDT,
+        ///     RM Mini Shate
         /// </remarks>
         Rm = 3,
 
         /// <summary>
-        /// A1 Temperature, Humidity, Light, Noise, VOC Sensor
+        ///     A1 Temperature, Humidity, Light, Noise, VOC Sensor
         /// </summary>
         /// <remarks>
-        /// A1
+        ///     A1
         /// </remarks>
         A1 = 4,
 
         /// <summary>
-        /// Smart Power Strip
+        ///     Smart Power Strip
         /// </summary>
         /// <remarks>
-        /// MP1, Honyar oem mp1
+        ///     MP1, Honyar oem mp1
         /// </remarks>
         Mp1 = 5,
 
         /// <summary>
-        /// Hysen heating controller
+        ///     Hysen heating controller
         /// </summary>
         /// <remarks>
-        /// Hysen controller
+        ///     Hysen controller
         /// </remarks>
         Hysen = 6,
 
         /// <summary>
-        /// S1 Motion, Door Sensors
+        ///     S1 Motion, Door Sensors
         /// </summary>
         /// <remarks>
-        /// Smart One Alarm Kit
+        ///     Smart One Alarm Kit
         /// </remarks>
         S1c = 7,
 
         /// <summary>
-        /// Dooya Curtain
+        ///     Dooya Curtain
         /// </summary>
         /// <remarks>
-        /// Dooya DT360E (DOOYA_CURTAIN_V2)
+        ///     Dooya DT360E (DOOYA_CURTAIN_V2)
         /// </remarks>
         Dooya = 8,
 
         /// <summary>
-        /// RM-Pro+ IR/RF Controller
+        ///     RM-Pro+ IR/RF Controller
         /// </summary>
         /// <remarks>
-        /// RM2 Pro Plus, RM2 Pro Plus2, RM2 Pro Plus3, RM2 Pro Plus_300,
-        /// RM2 Pro Plus BL, RM2 Pro Plus HYC, RM2 Pro Plus R1, RM2 Pro PP
+        ///     RM2 Pro Plus, RM2 Pro Plus2, RM2 Pro Plus3, RM2 Pro Plus_300,
+        ///     RM2 Pro Plus BL, RM2 Pro Plus HYC, RM2 Pro Plus R1, RM2 Pro PP
         /// </remarks>
-        Rm2Pro = 9,
-    }
+        Rm2Pro = 9
+	}
 }

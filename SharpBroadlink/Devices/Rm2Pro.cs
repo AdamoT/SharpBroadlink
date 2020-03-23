@@ -6,36 +6,29 @@ using System.Threading.Tasks;
 namespace SharpBroadlink.Devices
 {
     /// <summary>
-    /// Rm2Pro - Programmable Remote Controller for RF
+    ///     Rm2Pro - Programmable Remote Controller for RF
     /// </summary>
     public class Rm2Pro : Rm
-    {
-        #region Properties
-
-        public static TimeSpan RfFrequencyLearnInterval { get; set; } = TimeSpan.FromMilliseconds(1000);
-        public static TimeSpan RfCommandLearnInterval { get; set; } = TimeSpan.FromMilliseconds(1000);
-
-        #endregion Properties
-
-        #region Constructors
+	{
+		#region Constructors
 
         /// <summary>
-        /// Constructor
+        ///     Constructor
         /// </summary>
         /// <param name="host"></param>
         /// <param name="mac"></param>
         /// <param name="devType"></param>
         public Rm2Pro(IPEndPoint host, byte[] mac, int devType) : base(host, mac, devType)
-        {
-            DeviceType = DeviceType.Rm2Pro;
-        }
+		{
+			DeviceType = DeviceType.Rm2Pro;
+		}
 
-        #endregion Constructors
+		#endregion Constructors
 
-        #region Public Methods
+		#region Public Methods
 
         /// <summary>
-        /// Async method for learning RF commands
+        ///     Async method for learning RF commands
         /// </summary>
         /// <remarks>User should press and hold remote button until learning is finished</remarks>
         /// <param name="learnInstructions">When this action is invoked, instructions should be show to the user</param>
@@ -44,120 +37,128 @@ namespace SharpBroadlink.Devices
         /// <exception cref="InvalidOperationException">In case of failure</exception>
         /// <exception cref="TaskCanceledException">In case learning has benn cancelled</exception>
         public async Task<byte[]> LearnRfCommand(Action<LearnInstructions> learnInstructions, CancellationToken cancellationToken, Action learnProgress = null)
-        {
-            return await Task.Run(async () =>
-            {
-                try
-                {
-                    if (!await CancelLearning())
-                        throw new InvalidOperationException("Failed to cancel any previous learning");
-                    learnInstructions?.Invoke(LearnInstructions.PressAndHoldRemotedButton);
+		{
+			return await Task.Run(async () =>
+			{
+				try
+				{
+					if (!await CancelLearning())
+						throw new InvalidOperationException("Failed to cancel any previous learning");
+					learnInstructions?.Invoke(LearnInstructions.PressAndHoldRemotedButton);
 
-                    if (!await SweepFrequencies())
-                        throw new InvalidOperationException("Failed to sweep frequencies");
+					if (!await SweepFrequencies())
+						throw new InvalidOperationException("Failed to sweep frequencies");
 
-                    //Learn RF frequency - remote should be held all the time
-                    while (!await LearnRfFrequency())
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        learnProgress?.Invoke();
-                        await Task.Delay(RfFrequencyLearnInterval, cancellationToken);
-                    }
+					//Learn RF frequency - remote should be held all the time
+					while (!await LearnRfFrequency())
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+						learnProgress?.Invoke();
+						await Task.Delay(RfFrequencyLearnInterval, cancellationToken);
+					}
 
-                    learnInstructions?.Invoke(LearnInstructions.ReleaseRemoteButton);
+					learnInstructions?.Invoke(LearnInstructions.ReleaseRemoteButton);
 
-                    //Move to step 2 - learning the actual command
-                    await FindRfPacket();
-                    learnInstructions?.Invoke(LearnInstructions.PressRemoteButtonShortly);
+					//Move to step 2 - learning the actual command
+					await FindRfPacket();
+					learnInstructions?.Invoke(LearnInstructions.PressRemoteButtonShortly);
 
-                    byte[] commandData = null;
-                    while (null == (commandData = await CheckData()))
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        learnProgress?.Invoke();
-                        await Task.Delay(RfCommandLearnInterval, cancellationToken);
-                    }
-                    return commandData;
-                }
-                finally
-                {
-                    await CancelLearning();
-                }
-            }, cancellationToken);
-        }
+					byte[] commandData = null;
+					while (null == (commandData = await CheckData()))
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+						learnProgress?.Invoke();
+						await Task.Delay(RfCommandLearnInterval, cancellationToken);
+					}
 
-        #endregion Public Methods
+					return commandData;
+				}
+				finally
+				{
+					await CancelLearning();
+				}
+			}, cancellationToken);
+		}
 
-        #region Private Methods
+		#endregion Public Methods
+
+		#region Properties
+
+		public static TimeSpan RfFrequencyLearnInterval { get; set; } = TimeSpan.FromMilliseconds(1000);
+		public static TimeSpan RfCommandLearnInterval { get; set; } = TimeSpan.FromMilliseconds(1000);
+
+		#endregion Properties
+
+		#region Private Methods
 
         /// <summary>
-        /// Switch into RF Learning mode
+        ///     Switch into RF Learning mode
         /// </summary>
         /// <returns></returns>
         private async Task<bool> SweepFrequencies()
-        {
-            var packet = new byte[16];
-            packet[0] = 0x19;
+		{
+			var packet = new byte[16];
+			packet[0] = 0x19;
 
-            await SendPacket(0x6a, packet);
+			await SendPacket(0x6a, packet);
 
-            return true;
-        }
+			return true;
+		}
 
         /// <summary>
-        /// Enter RF frequency learning
+        ///     Enter RF frequency learning
         /// </summary>
         /// <returns>True if entering learning was successful</returns>
         private async Task<bool> LearnRfFrequency()
-        {
-            var packet = new byte[16];
-            packet[0] = 0x1a;
+		{
+			var packet = new byte[16];
+			packet[0] = 0x1a;
 
-            var response = await SendPacket(0x6a, packet);
-            if (response == null || response.Length <= 0x38)
-                return false;
+			var response = await SendPacket(0x6a, packet);
+			if (response == null || response.Length <= 0x38)
+				return false;
 
-            var err = response[0x22] | (response[0x23] << 8);
+			var err = response[0x22] | (response[0x23] << 8);
 
-            if (err == 0)
-            {
-                var payload = Decrypt(response, 0x38);
-                if (payload.Length <= 0x04)
-                    return false;
+			if (err == 0)
+			{
+				var payload = Decrypt(response, 0x38);
+				if (payload.Length <= 0x04)
+					return false;
 
-                return payload[0x04] == 1;
-            }
+				return payload[0x04] == 1;
+			}
 
-            // failure
-            return false;
-        }
+			// failure
+			return false;
+		}
 
         /// <summary>
-        /// Starts RF packet discovery
+        ///     Starts RF packet discovery
         /// </summary>
         /// <remarks>Return value doesn't seem to be correct, it's always incorrect</remarks>
         /// <returns>Ignore?</returns>
         private async Task<bool> FindRfPacket()
-        {
-            var packet = new byte[16];
-            packet[0] = 0x1b;
+		{
+			var packet = new byte[16];
+			packet[0] = 0x1b;
 
-            var response = await SendPacket(0x6a, packet);
-            if (response == null || response.Length <= 0x39)
-                return false;
+			var response = await SendPacket(0x6a, packet);
+			if (response == null || response.Length <= 0x39)
+				return false;
 
-            var err = response[0x22] | (response[0x23] << 8);
-            if (err == 0)
-            {
-                var payload = Decrypt(response, 0x38);
-                if (payload.Length < 5)
-                    return false;
-                return payload[0x04] == 1;
-            }
+			var err = response[0x22] | (response[0x23] << 8);
+			if (err == 0)
+			{
+				var payload = Decrypt(response, 0x38);
+				if (payload.Length < 5)
+					return false;
+				return payload[0x04] == 1;
+			}
 
-            return false;
-        }
+			return false;
+		}
 
-        #endregion Private Methods
-    }
+		#endregion Private Methods
+	}
 }
